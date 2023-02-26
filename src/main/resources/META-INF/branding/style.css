@@ -279,6 +279,31 @@ body svg {
     outline: none;
 }
 
+.swagger-ui .dialog-ux .modal-ux {
+    background: #333333;
+    border-color: #3C3C3C;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+    color: white;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content p {
+    color: #959595;
+}
+
+.swagger-ui .dialog-ux .modal-ux-content h4 {
+    color: white;
+}
+
+.swagger-ui label {
+    color: white;
+}
+
+.swagger-ui .auth-btn-wrapper .btn-done {
+    color: white !important;
+}
+
 #footer {
     font-family:sans-serif;
     color:#3b4151;

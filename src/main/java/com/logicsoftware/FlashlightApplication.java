@@ -24,15 +24,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
                 license = @License(
                         name = "Apache 2.0",
                         url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
-        security = @SecurityRequirement(name = "Keycloak"),
-        servers = {
-                @org.eclipse.microprofile.openapi.annotations.servers.Server(
-                        url = "http://localhost:8080",
-                        description = "Localhost")
-        },
-        externalDocs = @org.eclipse.microprofile.openapi.annotations.ExternalDocumentation(
-                description = "Flashlight API",
-                url = "https://www.logicsoftware.com.br")
+        security = @SecurityRequirement(name = "Keycloak")
 )
 public class FlashlightApplication extends Application {
 }
