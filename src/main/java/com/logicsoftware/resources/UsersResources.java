@@ -18,7 +18,9 @@ import javax.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.logging.Logger;
 
 import com.logicsoftware.dtos.user.UserCreateDto;
 import com.logicsoftware.dtos.user.UserDto;
@@ -26,6 +28,8 @@ import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.services.UsersService;
 import com.logicsoftware.utils.request.DataResponse;
 import com.logicsoftware.utils.request.PageResponse;
+
+import io.quarkus.arc.log.LoggerName;
 
 @Tag(name = "Users")
 @Path("/users")
@@ -35,6 +39,9 @@ public class UsersResources {
 
     @Inject
     UsersService userService;
+    
+    @LoggerName("users-service")
+    Logger logger;
 
     @POST
     @Path("/list")
@@ -89,10 +96,7 @@ public class UsersResources {
 
     @DELETE
     @Path("/{id}")
-    @Operation(
-        summary = "Delete an User",
-        description = "Delete an User from id"
-    )
+    @Operation(summary = "Delete an User", description = "Delete an User from id")
     @Parameters({
         @Parameter(name = "id", description = "User id", required = true, example = "1")
     })

@@ -9,27 +9,36 @@ import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.jboss.logging.Logger;
 
 import com.logicsoftware.dtos.user.UserCreateDto;
 import com.logicsoftware.dtos.user.UserDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.models.User;
 import com.logicsoftware.repositories.UsersRepository;
+import com.logicsoftware.utils.i18n.Messages;
 import com.logicsoftware.utils.mappers.GenericMapper;
+
+import io.quarkus.arc.log.LoggerName;
 
 @ApplicationScoped
 public class UsersService {
 
-    @Inject
-    UsersRepository usersRepository;
+    @LoggerName("users-service")
+    Logger logger;
 
     @Inject
     GenericMapper mapper;
 
+    @Inject
+    Messages message;
+
+    @Inject
+    UsersRepository usersRepository;
+
     private User getUser(Long id) {
         Optional<User> userFound =  usersRepository.find(id);
-        userFound.orElseThrow(() -> new NotFoundException("User not found"));
-        return userFound.get();
+        return userFound.orElseThrow(() -> new NotFoundException(message.getMessage("user.not.found", id)));
     }
 
     public List<UserDto> findAll(UserFilterDto filterDto, Integer page, Integer size) {
@@ -47,13 +56,16 @@ public class UsersService {
 
     public UserDto create(UserCreateDto userDto) {
         User newUser = mapper.toObject(userDto, User.class);
+        logger.info("[+] Creating user: " + newUser.toString());
         return mapper.toObject(usersRepository.create(newUser), UserDto.class);
     }
 
     public UserDto update(UserCreateDto userDto, Long id) throws IllegalAccessException, InvocationTargetException {
         User userFound =  getUser(id);
         BeanUtils.copyProperties(userFound, userDto);
-        return  mapper.toObject(usersRepository.update(userFound), UserDto.class);
+        var updatedUser = usersRepository.update(userFound);
+        logger.info("[+] Updated user: " + updatedUser.toString());
+        return  mapper.toObject(updatedUser, UserDto.class);
     }
 
     public void delete(Long id) {

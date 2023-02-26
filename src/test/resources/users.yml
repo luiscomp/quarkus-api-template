@@ -1,0 +1,7 @@
+# private Long id;
+# private String name;
+# private String email;
+User:
+  - id: 1
+    name: Luis Eduardo
+    email: luis.eduardo@email.com
