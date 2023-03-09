@@ -4,10 +4,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-import javax.ws.rs.core.Context;
-
 import org.jboss.resteasy.util.LocaleHelper;
 
 import io.quarkus.vertx.http.runtime.CurrentVertxRequest;
