@@ -1,44 +1,68 @@
 package com.logicsoftware.exceptions.handlers;
 
-import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Path.Node;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
 import org.jboss.resteasy.spi.ApplicationException;
 
-import com.logicsoftware.utils.request.DataResponse;
+import com.logicsoftware.utils.enums.ResponseStatus;
+import com.logicsoftware.utils.request.ErrorResponse;
+
+import io.quarkus.hibernate.validator.runtime.jaxrs.ResteasyViolationExceptionImpl;
 
 @Provider
 public class ApplicationHandler implements ExceptionMapper<ApplicationException> {
     @Override
     public Response toResponse(ApplicationException exception) {
-        DataResponse.DataResponseBuilder<?> response = DataResponse.builder();
+        ErrorResponse.ErrorResponseBuilder response = ErrorResponse.builder();
 
-        SQLIntegrityConstraintViolationException sqlIntegrityException = findConstraintViolationException(exception);
-        if(Objects.nonNull(sqlIntegrityException)) {
-            response.message("SQL Integrity Constraint Violation");
-            response.errors(Map.of("integrity", sqlIntegrityException.getMessage()));
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response.build()).build();
+        Throwable rootCause = getRootException(exception);
+        response.status(ResponseStatus.ERROR);
+        response.exception(rootCause.getClass());
+        response.errors(Map.of("message", rootCause.getMessage()));
+
+        if(rootCause.getClass().equals(ResteasyViolationExceptionImpl.class)) {
+            ResteasyViolationExceptionImpl error = (ResteasyViolationExceptionImpl) rootCause;
+            response.errors(error.getConstraintViolations().stream().collect(Collectors.toMap(this::getFieldPath, ConstraintViolation::getMessageTemplate)));
         }
 
-        response.message("Error");
-        response.errors(Map.of("Exception", exception.getMessage()));
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response.build()).build();
     }
 
-    private SQLIntegrityConstraintViolationException findConstraintViolationException(Throwable exception) {
-        while (exception.getCause() != null && exception.getCause() != exception) {
-            exception = exception.getCause();
-            if (exception.getClass().equals(SQLIntegrityConstraintViolationException.class)) {
-                return (SQLIntegrityConstraintViolationException) exception;
+    private Throwable getRootException(Throwable exception) {
+        Objects.requireNonNull(exception);
+        Throwable rootCause = exception;
+        while (rootCause.getCause() != null && rootCause.getCause() != rootCause) {
+            rootCause = rootCause.getCause();
+        }
+        return rootCause;
+    }
+
+    private String getFieldPath(ConstraintViolation<?> constraint) {
+        StringBuilder path = new StringBuilder();
+        Iterator<Node> iterator = constraint.getPropertyPath().iterator();
+        iterator.next();
+        while (iterator.hasNext()) {
+            Node node = iterator.next();
+            if (node.getName() != null) {
+                path.append(node.getName());
+                if(iterator.hasNext()) {
+                    path.append(".");
+                }
             }
         }
-        return null;
+        return path.toString();
     }
+
+
 }
 
 

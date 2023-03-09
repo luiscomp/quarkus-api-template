@@ -11,7 +11,8 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 @OpenAPIDefinition(
         tags = {
-                @Tag(name="Users", description="Users endpoints to integration.")
+                @Tag(name="Users", description="Users endpoints to integration."),
+                @Tag(name="Address", description="Address endpoints to integration.")
         },
         info = @Info(
                 title="Flashlight API",

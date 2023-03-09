@@ -10,7 +10,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@Schema(description = "Dto the represents a User")
+@Schema(description = "Dto representation of a User")
 public class UserDto {
     @Schema(description = "User Identify", example = "1")
     private Integer id;

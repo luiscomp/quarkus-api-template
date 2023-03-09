@@ -4,6 +4,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -25,6 +26,7 @@ import com.logicsoftware.dtos.user.UserCreateDto;
 import com.logicsoftware.dtos.user.UserDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.services.UsersService;
+import com.logicsoftware.utils.enums.ResponseStatus;
 import com.logicsoftware.utils.request.DataResponse;
 import com.logicsoftware.utils.request.PageResponse;
 
@@ -49,11 +51,11 @@ public class UsersResources {
             @Parameter(name = "page", description = "Page number", example = "1", required = true),
             @Parameter(name = "size", description = "Page size", example = "10", required = true)
     })
-    public PageResponse<UserDto> list(UserFilterDto filterDto, @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
+    public PageResponse<UserDto> list(UserFilterDto filter, @QueryParam("page") Integer page, @QueryParam("size") Integer size) {
         PageResponse.PageResponseBuilder<UserDto> response = PageResponse.builder();
 
-        response.page(userService.findAll(filterDto, page, size));
-        response.totalElements(userService.count(filterDto));
+        response.page(userService.findAll(filter, page, size));
+        response.totalElements(userService.count(filter));
         response.pageSize(size);
 
         return response.build();
@@ -68,15 +70,17 @@ public class UsersResources {
     public DataResponse<UserDto> find(@PathParam("id") Long id) {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
         response.data(userService.find(id));
+        response.status(ResponseStatus.SUCCESS);
         return response.build();
     }
 
     @POST
     @Operation(description = "Create a new User", summary = "Create a new User")
     @Transactional
-    public DataResponse<UserDto> create(UserCreateDto userDto) {
+    public DataResponse<UserDto> create(@Valid UserCreateDto user) {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
-        response.data(userService.create(userDto));
+        response.data(userService.create(user));
+        response.status(ResponseStatus.SUCCESS);
         return response.build();
     }
 
@@ -87,9 +91,10 @@ public class UsersResources {
             @Parameter(name = "id", description = "User id", example = "1", required = true)
     })
     @Transactional
-    public DataResponse<UserDto> update(UserCreateDto userDto, @PathParam("id") Long id) throws IllegalAccessException, InvocationTargetException {
+    public DataResponse<UserDto> update(UserCreateDto user, @PathParam("id") Long id) throws IllegalAccessException, InvocationTargetException {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
-        response.data(userService.update(userDto, id));
+        response.data(userService.update(user, id));
+        response.status(ResponseStatus.SUCCESS);
         return response.build();
     }
 
@@ -103,6 +108,7 @@ public class UsersResources {
     public DataResponse<Void> delete(@PathParam("id") Long id) {
         DataResponse.DataResponseBuilder<Void> response = DataResponse.builder();
         userService.delete(id);
+        response.status(ResponseStatus.SUCCESS);
         return response.build();
     }
 }

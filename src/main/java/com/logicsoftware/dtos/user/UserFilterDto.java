@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(description = "Dto the represents a User Filter")
+@Schema(description = "Dto representation of a User Filter")
 public class UserFilterDto {
     @Schema(description = "User Name", example = "Luis Eduardo M. Ferreira", required = true)
     private String name;
