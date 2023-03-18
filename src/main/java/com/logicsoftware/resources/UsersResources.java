@@ -91,7 +91,7 @@ public class UsersResources {
             @Parameter(name = "id", description = "User id", example = "1", required = true)
     })
     @Transactional
-    public DataResponse<UserDto> update(UserCreateDto user, @PathParam("id") Long id) throws IllegalAccessException, InvocationTargetException {
+    public DataResponse<UserDto> update(@Valid UserCreateDto user, @PathParam("id") Long id) throws IllegalAccessException, InvocationTargetException {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
         response.data(userService.update(user, id));
         response.status(ResponseStatus.SUCCESS);

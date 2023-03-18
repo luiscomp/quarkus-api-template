@@ -9,6 +9,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
@@ -32,6 +34,10 @@ public class AddressResource {
         summary = "Get a Address by CEP",
         description = "Pass a CEP to get a Address"
     )
+
+    @Parameters({
+        @Parameter(name = "cep", description = "Address CEP", required = true, example = "64033660")
+    })
     public DataResponse<ViaCepResponseDTO> getAddressByCep(@PathParam("cep") String cep) {
         DataResponse.DataResponseBuilder<ViaCepResponseDTO> response = DataResponse.builder();
         response.data(addressService.getAddressByCep(cep));

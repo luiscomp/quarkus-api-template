@@ -1,13 +1,12 @@
 package com.logicsoftware;
 
-import static com.logicsoftware.keycloak.KeycloakLifecycle.getAccessToken;
 import static io.restassured.RestAssured.given;
 
 import org.junit.jupiter.api.Test;
 
 import com.logicsoftware.dtos.user.UserDto;
-import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.keycloak.KeycloakLifecycle;
+import com.logicsoftware.keycloak.KeycloakResource;
 import com.logicsoftware.utils.request.PageResponse;
 
 import io.quarkus.test.common.QuarkusTestResource;
@@ -16,17 +15,17 @@ import io.restassured.http.ContentType;
 
 @QuarkusTest
 @QuarkusTestResource(KeycloakLifecycle.class)
-public class UserIntegrationTest {
+public class UserIntegrationTest extends KeycloakResource {
 
     @Test
     public void userListEndpoint() {
         given()
-            .auth().oauth2(getAccessToken("admin"))
+            .auth().oauth2(getAccessToken("luis.eduardo", "123456"))
             .when()
             .contentType(ContentType.JSON)
-            .queryParam("page", 1)
-            .queryParam("size", 10)
-            .body(new UserFilterDto())
+            .queryParam("page", "1")
+            .queryParam("size", "10")
+            // .body(new UserFilterDto());
             .post("/users/list")
             .then()
             .statusCode(200)

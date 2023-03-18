@@ -2,21 +2,20 @@ package com.logicsoftware.keycloak;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Consumer;
 
+import org.apache.commons.io.FilenameUtils;
 import org.keycloak.representations.AccessTokenResponse;
-import org.keycloak.representations.idm.ClientRepresentation;
-import org.keycloak.representations.idm.CredentialRepresentation;
-import org.keycloak.representations.idm.RealmRepresentation;
-import org.keycloak.representations.idm.RoleRepresentation;
-import org.keycloak.representations.idm.RolesRepresentation;
-import org.keycloak.representations.idm.UserRepresentation;
-import org.keycloak.util.JsonSerialization;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.MountableFile;
+
+import com.github.dockerjava.api.command.CreateContainerCmd;
+import com.github.dockerjava.api.model.ExposedPort;
+import com.github.dockerjava.api.model.PortBinding;
+import com.github.dockerjava.api.model.Ports;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
 import io.restassured.RestAssured;
@@ -28,61 +27,53 @@ public class KeycloakLifecycle implements QuarkusTestResourceLifecycleManager {
     private GenericContainer<?> keycloak = new GenericContainer<>("quay.io/keycloak/keycloak:19.0.1");
 
     private static String KEYCLOAK_SERVER_URL;
-    private static final int KEYCLOAK_PORT_HTTP = 8080;
+    private static final int KEYCLOAK_EXPOSED_PORT_HTTP = 8080;
+    private static final int KEYCLOAK_BINDING_PORT_HTTP = 3200;
     private static final String KEYCLOAK_CONTEXT_PATH = "/";
     private static final String KEYCLOAK_REALM = "quarkus";
     private static final String KEYCLOAK_SERVICE_CLIENT = "flashlight-backend";
-    private static final String KEYCLOAK_SERVICE_CLIENT_SECRET = "secret";
+    private static final String KEYCLOAK_SERVICE_CLIENT_SECRET = UUID.randomUUID().toString();
+    private static final String DEFAULT_REALM_IMPORT_FILES_LOCATION = "/opt/keycloak/data/import/";
+    private static final String REALM_FILE = "/keycloak/quarkus-realm.json";
 
     @Override
     public Map<String, String> start() {
+        Consumer<CreateContainerCmd> cmd = e -> 
+            e.getHostConfig().withPortBindings(new PortBinding(Ports.Binding.bindPort(KEYCLOAK_BINDING_PORT_HTTP), new ExposedPort(KEYCLOAK_EXPOSED_PORT_HTTP)));
+
         keycloak = keycloak
-            .withExposedPorts(KEYCLOAK_PORT_HTTP)
+            .withExposedPorts(KEYCLOAK_EXPOSED_PORT_HTTP)
+            .withCreateContainerCmdModifier(cmd)
             .withEnv("KEYCLOAK_ADMIN", "admin")
             .withEnv("KEYCLOAK_ADMIN_PASSWORD", "admin");
 
-        keycloak = keycloak.withCommand("start-dev");
+
+        String importFileInContainer = DEFAULT_REALM_IMPORT_FILES_LOCATION + FilenameUtils.getName(REALM_FILE);
+        keycloak.withCopyFileToContainer(MountableFile.forClasspathResource(REALM_FILE), importFileInContainer);
+        // keycloak.setCommandParts(new String[]{ "start-dev", "--import-realm" });
+        keycloak = keycloak.withCommand("start-dev --import-realm");
 
         keycloak.setWaitStrategy(Wait
             .forHttp(KEYCLOAK_CONTEXT_PATH)
-            .forPort(KEYCLOAK_PORT_HTTP)
+            .forPort(KEYCLOAK_EXPOSED_PORT_HTTP)
             .withStartupTimeout(Duration.ofMinutes(2))
         );
 
         keycloak.start();
 
         KEYCLOAK_SERVER_URL = getAuthServerUrl();
-
-        RealmRepresentation realm = createRealm(KEYCLOAK_REALM);
-        postRealm(realm);
         
         Map<String, String> properties = Map.of(
             "quarkus.oidc.auth-server-url", KEYCLOAK_SERVER_URL + "realms/" + KEYCLOAK_REALM,
             "quarkus.oidc.client-id", KEYCLOAK_SERVICE_CLIENT,
-            "quarkus.oidc.credentials.secret", KEYCLOAK_SERVICE_CLIENT_SECRET,
-            "quarkus.smallrye-openapi.oauth2-implicit-authorization-url", KEYCLOAK_SERVER_URL + "realms/" + KEYCLOAK_REALM + "/protocol/openid-connect/auth",
-            "quarkus.smallrye-openapi.oidc-open-id-connect-url", KEYCLOAK_SERVER_URL + "realms/" + KEYCLOAK_REALM + "/.well-known/openid-configuration",
-            "quarkus.swagger-ui.oauth2-redirect-url", "http://localhost:8081/flashlight/swagger-ui/oauth2-redirect.html"
+            "quarkus.oidc.credentials.secret", KEYCLOAK_SERVICE_CLIENT_SECRET
         );
 
         return properties;
     }
 
     private String getAuthServerUrl() {
-        return String.format("http://%s:%s%s", keycloak.getHost(), keycloak.getMappedPort(KEYCLOAK_PORT_HTTP), KEYCLOAK_CONTEXT_PATH);
-    }
-
-    private static void postRealm(RealmRepresentation realm) {
-        try {
-            createRequestSpec().auth().oauth2(getAdminAccessToken())
-                    .contentType(ContentType.JSON)
-                    .body(JsonSerialization.writeValueAsBytes(realm))
-                    .when()
-                    .post(KEYCLOAK_SERVER_URL + "admin/realms").then()
-                    .statusCode(201);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return String.format("http://%s:%s%s", keycloak.getHost(), keycloak.getMappedPort(KEYCLOAK_EXPOSED_PORT_HTTP), KEYCLOAK_CONTEXT_PATH);
     }
 
     private static String getAdminAccessToken() {
@@ -97,101 +88,6 @@ public class KeycloakLifecycle implements QuarkusTestResourceLifecycleManager {
                 .when()
                 .post(KEYCLOAK_SERVER_URL + "realms/master/protocol/openid-connect/token")
                 .as(AccessTokenResponse.class).getToken();
-    }
-
-    public static String getAccessToken(String userName) {
-        return createRequestSpec()
-                .contentType(ContentType.URLENC)
-                .formParams(Map.of(
-                    "username", userName,
-                    "password", userName,
-                    "grant_type", "password",
-                    "client_id", KEYCLOAK_SERVICE_CLIENT,
-                    "client_secret", KEYCLOAK_SERVICE_CLIENT_SECRET
-                ))
-                .when()
-                .post(KEYCLOAK_SERVER_URL + "realms/" + KEYCLOAK_REALM + "/protocol/openid-connect/token")
-                .as(AccessTokenResponse.class).getToken();
-    }
-
-    public static String getRefreshToken(String userName) {
-        return createRequestSpec()
-                .contentType(ContentType.URLENC)
-                .formParams(Map.of(
-                    "username", userName,
-                    "password", userName,
-                    "grant_type", "password",
-                    "client_id", KEYCLOAK_SERVICE_CLIENT,
-                    "client_secret", KEYCLOAK_SERVICE_CLIENT_SECRET
-                ))
-                .when()
-                .post(KEYCLOAK_SERVER_URL + "realms/" + KEYCLOAK_REALM + "/protocol/openid-connect/token")
-                .as(AccessTokenResponse.class).getRefreshToken();
-    }
-
-    private static RealmRepresentation createRealm(String name) {
-        RealmRepresentation realm = new RealmRepresentation();
-
-        realm.setRealm(name);
-        realm.setEnabled(true);
-        realm.setUsers(new ArrayList<>());
-        realm.setClients(new ArrayList<>());
-
-        RolesRepresentation roles = new RolesRepresentation();
-        List<RoleRepresentation> realmRoles = new ArrayList<>();
-
-        roles.setRealm(realmRoles);
-        realm.setRoles(roles);
-
-        realm.getRoles().getRealm().add(new RoleRepresentation("user", null, false));
-        realm.getRoles().getRealm().add(new RoleRepresentation("admin", null, false));
-        realm.getRoles().getRealm().add(new RoleRepresentation("confidential", null, false));
-
-        realm.getClients().add(createServiceClient(KEYCLOAK_SERVICE_CLIENT, KEYCLOAK_SERVICE_CLIENT_SECRET));
-
-        realm.getUsers().add(createUser("alice", List.of("user", "default-roles-quarkus ")));
-        realm.getUsers().add(createUser("admin", List.of("user", "admin", "default-roles-quarkus ")));
-        realm.getUsers().add(createUser("jdoe", List.of("user", "confidential", "default-roles-quarkus ")));
-
-        return realm;
-    }
-
-    private static ClientRepresentation createServiceClient(String clientId, String clientSecret) {
-        ClientRepresentation client = new ClientRepresentation();
-
-        client.setClientId(clientId);
-        client.setSecret(clientSecret);
-        client.setPublicClient(false);
-        client.setDirectAccessGrantsEnabled(true);
-        client.setStandardFlowEnabled(true);
-        client.setServiceAccountsEnabled(true);
-        client.setRedirectUris(Arrays.asList("*"));
-        client.setWebOrigins(Arrays.asList("*"));
-        client.setAuthorizationServicesEnabled(true);
-        client.setEnabled(true);
-
-        return client;
-    }
-
-    private static UserRepresentation createUser(String username, List<String> realmRoles) {
-        UserRepresentation user = new UserRepresentation();
-
-        user.setUsername(username);
-        user.setEnabled(true);
-        user.setCredentials(new ArrayList<>());
-        user.setRealmRoles(realmRoles);
-        user.setEmail(username + "@gmail.com");
-        user.setEmailVerified(true);
-
-        CredentialRepresentation credential = new CredentialRepresentation();
-
-        credential.setType(CredentialRepresentation.PASSWORD);
-        credential.setValue(username);
-        credential.setTemporary(false);
-
-        user.getCredentials().add(credential);
-
-        return user;
     }
 
     @Override
