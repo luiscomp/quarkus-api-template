@@ -13,7 +13,7 @@ import javax.ws.rs.ext.Provider;
 
 import org.jboss.resteasy.spi.ApplicationException;
 
-import com.logicsoftware.utils.enums.ResponseStatus;
+import com.logicsoftware.utils.enums.AppStatus;
 import com.logicsoftware.utils.request.ErrorResponse;
 
 import io.quarkus.hibernate.validator.runtime.jaxrs.ResteasyViolationExceptionImpl;
@@ -25,7 +25,7 @@ public class ApplicationHandler implements ExceptionMapper<ApplicationException>
         ErrorResponse.ErrorResponseBuilder response = ErrorResponse.builder();
 
         Throwable rootCause = getRootException(exception);
-        response.status(ResponseStatus.ERROR);
+        response.status(AppStatus.ERROR);
         response.exception(rootCause.getClass());
         response.errors(Map.of("message", rootCause.getMessage()));
 

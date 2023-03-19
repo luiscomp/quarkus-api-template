@@ -26,7 +26,7 @@ import com.logicsoftware.dtos.user.UserCreateDto;
 import com.logicsoftware.dtos.user.UserDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.services.UsersService;
-import com.logicsoftware.utils.enums.ResponseStatus;
+import com.logicsoftware.utils.enums.AppStatus;
 import com.logicsoftware.utils.request.DataResponse;
 import com.logicsoftware.utils.request.PageResponse;
 
@@ -70,7 +70,7 @@ public class UsersResources {
     public DataResponse<UserDto> find(@PathParam("id") Long id) {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
         response.data(userService.find(id));
-        response.status(ResponseStatus.SUCCESS);
+        response.status(AppStatus.SUCCESS);
         return response.build();
     }
 
@@ -80,7 +80,7 @@ public class UsersResources {
     public DataResponse<UserDto> create(@Valid UserCreateDto user) {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
         response.data(userService.create(user));
-        response.status(ResponseStatus.SUCCESS);
+        response.status(AppStatus.SUCCESS);
         return response.build();
     }
 
@@ -94,7 +94,7 @@ public class UsersResources {
     public DataResponse<UserDto> update(@Valid UserCreateDto user, @PathParam("id") Long id) throws IllegalAccessException, InvocationTargetException {
         DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
         response.data(userService.update(user, id));
-        response.status(ResponseStatus.SUCCESS);
+        response.status(AppStatus.SUCCESS);
         return response.build();
     }
 
@@ -108,7 +108,7 @@ public class UsersResources {
     public DataResponse<Void> delete(@PathParam("id") Long id) {
         DataResponse.DataResponseBuilder<Void> response = DataResponse.builder();
         userService.delete(id);
-        response.status(ResponseStatus.SUCCESS);
+        response.status(AppStatus.SUCCESS);
         return response.build();
     }
 }

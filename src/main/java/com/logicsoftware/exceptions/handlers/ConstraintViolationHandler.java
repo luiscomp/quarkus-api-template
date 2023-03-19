@@ -9,7 +9,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import com.logicsoftware.utils.enums.ResponseStatus;
+import com.logicsoftware.utils.enums.AppStatus;
 import com.logicsoftware.utils.request.ErrorResponse;
 
 
@@ -21,7 +21,7 @@ public class ConstraintViolationHandler implements ExceptionMapper<ConstraintVio
         Set<ConstraintViolation<?>> constraintViolations = exception.getConstraintViolations();
 
         ErrorResponse.ErrorResponseBuilder response = ErrorResponse.builder();
-        response.status(ResponseStatus.ERROR);
+        response.status(AppStatus.ERROR);
         response.errors(constraintViolations.stream().collect(Collectors.toMap(ConstraintViolation::getPropertyPath, constraint -> constraint.getMessageTemplate())));
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response.build()).build();
     }

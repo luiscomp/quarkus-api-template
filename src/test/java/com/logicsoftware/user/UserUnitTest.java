@@ -1,4 +1,4 @@
-package com.logicsoftware;
+package com.logicsoftware.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -11,6 +11,7 @@ import com.github.database.rider.core.api.configuration.DBUnit;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.logicsoftware.database.DatabaseLifecycle;
 import com.logicsoftware.repositories.UsersRepository;
+import com.logicsoftware.services.UsersService;
 
 import io.quarkus.test.common.QuarkusTestResource;
 
@@ -23,12 +24,11 @@ import io.quarkus.test.junit.QuarkusTest;
 public class UserUnitTest {
 
     @Inject
-    UsersRepository usersRepository;
+    UsersService usersService;
 
     @Test
     @DataSet("users.yml")
     public void userCount() {
-        assertEquals(true, true);
-        // Assert.assertEquals(1, usersRepository.count());
+        assertEquals(1, usersService.findAll(null, 1, 10).size());
     }
 }

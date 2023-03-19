@@ -1,6 +1,5 @@
 package com.logicsoftware.keycloak;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 import java.util.UUID;

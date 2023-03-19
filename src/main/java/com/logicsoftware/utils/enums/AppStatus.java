@@ -1,12 +1,12 @@
 package com.logicsoftware.utils.enums;
 
-public enum ResponseStatus {
+public enum AppStatus {
     SUCCESS("success"),
     ERROR("error");
 
     private String status;
 
-    ResponseStatus(String status) {
+    AppStatus(String status) {
         this.status = status;
     }
 
