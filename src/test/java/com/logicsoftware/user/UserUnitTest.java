@@ -10,11 +10,9 @@ import com.github.database.rider.cdi.api.DBRider;
 import com.github.database.rider.core.api.configuration.DBUnit;
 import com.github.database.rider.core.api.dataset.DataSet;
 import com.logicsoftware.database.DatabaseLifecycle;
-import com.logicsoftware.repositories.UsersRepository;
 import com.logicsoftware.services.UsersService;
 
 import io.quarkus.test.common.QuarkusTestResource;
-
 import io.quarkus.test.junit.QuarkusTest;
 
 @DBRider
