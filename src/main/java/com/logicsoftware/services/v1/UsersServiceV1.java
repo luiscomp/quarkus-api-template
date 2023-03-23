@@ -23,7 +23,7 @@ import com.logicsoftware.utils.mappers.GenericMapper;
 import io.quarkus.arc.log.LoggerName;
 
 @ApplicationScoped
-public class UsersServiceImpl implements UsersService {
+public class UsersServiceV1 implements UsersService {
 
     @LoggerName("users-service")
     Logger logger;

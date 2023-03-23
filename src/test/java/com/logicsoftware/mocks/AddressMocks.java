@@ -1,10 +1,10 @@
-package com.logicsoftware.address;
+package com.logicsoftware.mocks;
 
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
 
 public class AddressMocks {
 
-    public ViaCepResponseDTO addressByCepMock() {
+    public static ViaCepResponseDTO viaCepAddress() {
         return ViaCepResponseDTO.builder()
                 .cep("64033660")
                 .logradouro("Rua 1")

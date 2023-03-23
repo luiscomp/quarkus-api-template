@@ -16,7 +16,7 @@ import io.quarkus.arc.log.LoggerName;
 
 @Unremovable
 @ApplicationScoped
-public class AddressServiceImpl implements AddressService {
+public class AddressServiceV1 implements AddressService {
     
     @LoggerName("address-service")
     Logger logger;

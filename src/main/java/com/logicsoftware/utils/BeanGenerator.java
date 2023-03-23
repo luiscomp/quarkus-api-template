@@ -3,6 +3,7 @@ package com.logicsoftware.utils;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -20,29 +21,28 @@ public class BeanGenerator {
 	@LoggerName("bean-generator")
 	Logger logger;
 
-	public <T> T getInstance(Class<T> beanClass, String version) {
+	public <T> Optional<T> getInstance(Class<T> beanClass, String version) {
+		Optional<T> bean = Optional.empty();
+
 		String beanClassName = beanClass.getSimpleName();
 
-		// Busca a pasta correspondente à versão especificada
-		Path versionPath = Path.of(beanClass.getResource("").getPath(), VERSION_PREFIX + version);
+		try {
+			// Busca a pasta correspondente à versão especificada
+			Path versionPath = getVersionPath(beanClass, version);
 
-		// Verifica se a pasta da versão existe
-		if (!Files.isDirectory(versionPath)) {
-			logger.error("No implementation found for version " + version + " of bean class " + beanClassName);
-			throw new IllegalArgumentException(
-					"No implementation found for version " + version + " of bean class " + beanClassName);
+			// Verifica se a implementação da classe de bean especificada existe
+			Path implementationPath = getVersionImplementationPath(versionPath, beanClassName, version);
+
+			// Cria uma nova instância da implementação usando o Quarkus Arc
+			bean = Optional.ofNullable(getInstance(implementationPath, beanClassName, version));
+		} catch (Exception e) {
+			logger.error("Error creating bean instance for class " + beanClassName + " in version " + version, e);
 		}
 
-		// Verifica se a implementação da classe de bean especificada existe
-		Path implementationPath = versionPath.resolve(beanClassName + "Impl.class");
+		return bean;
+	}
 
-		if (!Files.isRegularFile(implementationPath)) {
-			logger.error("No implementation found for bean class " + beanClassName + " in version " + version);
-			throw new IllegalArgumentException(
-					"No implementation found for bean class " + beanClassName + " in version " + version);
-		}
-
-		// Cria uma nova instância da implementação usando o Quarkus Arc
+	private <T> T getInstance(Path implementationPath, String beanClassName, String version) {
 		try {
 			@SuppressWarnings("unchecked")
 			Class<T> implementationClass = (Class<T>) Class.forName(getClassNameFromPath(implementationPath));
@@ -56,9 +56,31 @@ public class BeanGenerator {
 			}
 		} catch (Exception e) {
 			logger.error("Error creating bean instance for class " + beanClassName + " in version " + version, e);
-			throw new RuntimeException(
-					"Error creating bean instance for class " + beanClassName + " in version " + version, e);
+			throw new RuntimeException("Error creating bean instance for class " + beanClassName + " in version " + version, e);
 		}
+	}
+
+	private Path getVersionImplementationPath(Path versionPath, String beanClassName, String version) {
+		Path implementationPath = versionPath.resolve(beanClassName + "V" + version + ".class");
+
+		if (!Files.isRegularFile(implementationPath)) {
+			logger.error("No implementation found for bean class " + beanClassName + " in version " + version);
+			throw new IllegalArgumentException("No implementation found for bean class " + beanClassName + " in version " + version);
+		}
+
+		return implementationPath;
+	}
+
+	private <T> Path getVersionPath(Class<T> beanClass, String version) {
+		Path versionPath = Path.of(beanClass.getResource("").getPath(), VERSION_PREFIX + version);
+
+		// Verifica se a pasta da versão existe
+		if (!Files.isDirectory(versionPath)) {
+			logger.error("No implementation found for version " + version + " of bean class " + beanClass.getSimpleName());
+			throw new IllegalArgumentException("No implementation found for version " + version + " of bean class " + beanClass.getSimpleName());
+		}
+
+		return versionPath;
 	}
 
 	private String getClassNameFromPath(Path path) {

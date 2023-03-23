@@ -26,6 +26,6 @@ public class Beans {
 
     @Produces
     public Messages messages() {
-        return Messages.builder().defaultLang("pt-BR").request(request).build();
+        return Messages.builder().defaultLang("en").request(request).build();
     }
 }

@@ -14,22 +14,24 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
+import com.logicsoftware.exceptions.ResourceNotFoundException;
 import com.logicsoftware.services.AddressService;
 import com.logicsoftware.utils.BeanGenerator;
 import com.logicsoftware.utils.enums.AppStatus;
+import com.logicsoftware.utils.i18n.Messages;
 import com.logicsoftware.utils.request.DataResponse;
 
 @Tag(name = "Address")
-@Path("/address")
+@Path("/address/v{version}")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class AddressResource {
 
-    // @Inject
-    // AddressService addressService;
-
     @Inject
     BeanGenerator beanGenerator;
+
+    @Inject
+    Messages message;
 
     @GET
     @Path("/cep/{cep}")
@@ -38,10 +40,12 @@ public class AddressResource {
         description = "Pass a CEP to get a Address"
     )
     @Parameters({
-        @Parameter(name = "cep", description = "Address CEP", required = true, example = "64033660")
+        @Parameter(name = "cep", description = "Address CEP", required = true, example = "64033660"),
+        @Parameter(name = "version", description = "Version of the API", required = true, example = "1")
     })
-    public DataResponse<ViaCepResponseDTO> getAddressByCep(@PathParam("cep") String cep) {
-        AddressService addressService = beanGenerator.getInstance(AddressService.class, "2");
+    public DataResponse<ViaCepResponseDTO> getAddressByCep(@PathParam("cep") String cep, @PathParam("version") String version) {
+        AddressService addressService = beanGenerator.getInstance(AddressService.class, version)
+            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
 
         DataResponse.DataResponseBuilder<ViaCepResponseDTO> response = DataResponse.builder();
         response.data(addressService.getAddressByCep(cep));

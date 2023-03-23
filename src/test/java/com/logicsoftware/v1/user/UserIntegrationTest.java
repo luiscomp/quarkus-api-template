@@ -1,4 +1,4 @@
-package com.logicsoftware.user;
+package com.logicsoftware.v1.user;
 
 import static io.restassured.RestAssured.given;
 
