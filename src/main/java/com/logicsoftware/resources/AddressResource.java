@@ -15,6 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
 import com.logicsoftware.services.AddressService;
+import com.logicsoftware.utils.BeanGenerator;
 import com.logicsoftware.utils.enums.AppStatus;
 import com.logicsoftware.utils.request.DataResponse;
 
@@ -24,9 +25,11 @@ import com.logicsoftware.utils.request.DataResponse;
 @Produces(MediaType.APPLICATION_JSON)
 public class AddressResource {
 
-    @Inject
-    AddressService addressService;
+    // @Inject
+    // AddressService addressService;
 
+    @Inject
+    BeanGenerator beanGenerator;
 
     @GET
     @Path("/cep/{cep}")
@@ -38,6 +41,8 @@ public class AddressResource {
         @Parameter(name = "cep", description = "Address CEP", required = true, example = "64033660")
     })
     public DataResponse<ViaCepResponseDTO> getAddressByCep(@PathParam("cep") String cep) {
+        AddressService addressService = beanGenerator.getInstance(AddressService.class, "2");
+
         DataResponse.DataResponseBuilder<ViaCepResponseDTO> response = DataResponse.builder();
         response.data(addressService.getAddressByCep(cep));
         response.status(AppStatus.SUCCESS);
