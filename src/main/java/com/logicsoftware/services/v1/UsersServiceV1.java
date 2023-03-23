@@ -20,8 +20,9 @@ import com.logicsoftware.services.UsersService;
 import com.logicsoftware.utils.i18n.Messages;
 import com.logicsoftware.utils.mappers.GenericMapper;
 
+import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.log.LoggerName;
-
+@Unremovable
 @ApplicationScoped
 public class UsersServiceV1 implements UsersService {
 
