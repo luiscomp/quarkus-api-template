@@ -22,7 +22,6 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameters;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import com.logicsoftware.dtos.user.UserCreateDto;
-import com.logicsoftware.dtos.user.UserDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 import com.logicsoftware.exceptions.ResourceNotFoundException;
 import com.logicsoftware.services.UsersService;
@@ -53,11 +52,12 @@ public class UsersResources {
         @Parameter(name = "size", description = "Page size", example = "10", required = true),
         @Parameter(name = "version", description = "Version of the API", required = true, example = "1")
     })
-    public PageResponse<UserDto> list(UserFilterDto filter, @QueryParam("page") Integer page, @QueryParam("size") Integer size, @PathParam("version") String version) {
+    public PageResponse<Object> list(UserFilterDto filter, @QueryParam("page") Integer page, @QueryParam("size") Integer size, @PathParam("version") String version) {
         UsersService userService = beanGenerator.getInstance(UsersService.class, version)
-            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                .orElseThrow(
+                    () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
         
-        PageResponse.PageResponseBuilder<UserDto> response = PageResponse.builder();
+        PageResponse.PageResponseBuilder<Object> response = PageResponse.builder();
         response.page(userService.findAll(filter, page, size));
         response.totalElements(userService.count(filter));
         response.pageSize(size);
@@ -72,11 +72,12 @@ public class UsersResources {
         @Parameter(name = "id", description = "User id", example = "1", required = true),
         @Parameter(name = "version", description = "Version of the API", required = true, example = "1")
     })
-    public DataResponse<UserDto> find(@PathParam("id") Long id, @PathParam("version") String version) {
+    public DataResponse<Object> find(@PathParam("id") Long id, @PathParam("version") String version) {
         UsersService userService = beanGenerator.getInstance(UsersService.class, version)
-            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                .orElseThrow(
+                    () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
 
-        DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
+        DataResponse.DataResponseBuilder<Object> response = DataResponse.builder();
         response.data(userService.find(id));
         response.status(AppStatus.SUCCESS);
         return response.build();
@@ -88,11 +89,12 @@ public class UsersResources {
         @Parameter(name = "version", description = "Version of the API", required = true, example = "1")
     })
     @Transactional
-    public DataResponse<UserDto> create(@Valid UserCreateDto user, @PathParam("version") String version) {
+    public DataResponse<Object> create(@Valid UserCreateDto user, @PathParam("version") String version) {
         UsersService userService = beanGenerator.getInstance(UsersService.class, version)
-            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                .orElseThrow(
+                    () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
 
-        DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
+        DataResponse.DataResponseBuilder<Object> response = DataResponse.builder();
         response.data(userService.create(user));
         response.status(AppStatus.SUCCESS);
         return response.build();
@@ -106,11 +108,12 @@ public class UsersResources {
         @Parameter(name = "version", description = "Version of the API", required = true, example = "1")
     })
     @Transactional
-    public DataResponse<UserDto> update(@Valid UserCreateDto user, @PathParam("id") Long id, @PathParam("version") String version) throws IllegalAccessException, InvocationTargetException {
+    public DataResponse<Object> update(@Valid UserCreateDto user, @PathParam("id") Long id, @PathParam("version") String version) throws IllegalAccessException, InvocationTargetException {
         UsersService userService = beanGenerator.getInstance(UsersService.class, version)
-            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                .orElseThrow(
+                    () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
 
-        DataResponse.DataResponseBuilder<UserDto> response = DataResponse.builder();
+        DataResponse.DataResponseBuilder<Object> response = DataResponse.builder();
         response.data(userService.update(user, id));
         response.status(AppStatus.SUCCESS);
         return response.build();
@@ -126,7 +129,8 @@ public class UsersResources {
     @Transactional
     public DataResponse<Void> delete(@PathParam("id") Long id, @PathParam("version") String version) {
         UsersService userService = beanGenerator.getInstance(UsersService.class, version)
-            .orElseThrow(() -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                .orElseThrow(
+                    () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
 
         DataResponse.DataResponseBuilder<Void> response = DataResponse.builder();
         userService.delete(id);

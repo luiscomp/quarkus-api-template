@@ -6,10 +6,9 @@ import javax.inject.Inject;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 import org.jboss.logging.Logger;
 
-import com.logicsoftware.clients.ViaCepClient;
-import com.logicsoftware.dtos.address.ViaCepResponseDTO;
+import com.logicsoftware.clients.ApiCepClient;
+import com.logicsoftware.dtos.address.ApiCepResponseDTO;
 import com.logicsoftware.services.AddressService;
-import com.logicsoftware.utils.i18n.Messages;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.log.LoggerName;
@@ -18,18 +17,15 @@ import io.quarkus.arc.log.LoggerName;
 @ApplicationScoped
 public class AddressServiceV2 implements AddressService {
     
-    @LoggerName("address-service")
+    @LoggerName("address-service-v2")
     Logger logger;
 
     @Inject
-    Messages message;
-
-    @Inject
     @RestClient
-    ViaCepClient viaCepClient;
+    ApiCepClient apiCepClient;
 
     @Override
-    public ViaCepResponseDTO getAddressByCep(String cep) {
-        return viaCepClient.getAddressByCep("64000100");
+    public ApiCepResponseDTO getAddressByCep(String cep) {
+        return apiCepClient.getAddressByCep(cep);
     }
 }

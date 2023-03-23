@@ -11,15 +11,21 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.jboss.logging.Logger;
 import org.jboss.resteasy.spi.ApplicationException;
 
 import com.logicsoftware.utils.enums.AppStatus;
 import com.logicsoftware.utils.request.ErrorResponse;
 
+import io.quarkus.arc.log.LoggerName;
 import io.quarkus.hibernate.validator.runtime.jaxrs.ResteasyViolationExceptionImpl;
 
 @Provider
 public class ApplicationHandler implements ExceptionMapper<ApplicationException> {
+
+    @LoggerName("application-handler")
+    Logger logger;
+
     @Override
     public Response toResponse(ApplicationException exception) {
         ErrorResponse.ErrorResponseBuilder response = ErrorResponse.builder();
@@ -33,6 +39,8 @@ public class ApplicationHandler implements ExceptionMapper<ApplicationException>
             ResteasyViolationExceptionImpl error = (ResteasyViolationExceptionImpl) rootCause;
             response.errors(error.getConstraintViolations().stream().collect(Collectors.toMap(this::getFieldPath, ConstraintViolation::getMessageTemplate)));
         }
+
+        logger.error(exception.getMessage(), exception);
 
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(response.build()).build();
     }

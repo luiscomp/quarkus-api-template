@@ -304,6 +304,11 @@ body svg {
     color: white !important;
 }
 
+.swagger-ui .response-controls {
+    display: flex;
+    padding-top: 0;
+}
+
 #footer {
     font-family:sans-serif;
     color:#3b4151;

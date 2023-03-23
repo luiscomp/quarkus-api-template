@@ -44,8 +44,8 @@ public class UsersServiceV1 implements UsersService {
     }
 
     @Override
-    public List<UserDto> findAll(UserFilterDto filterDto, Integer page, Integer size) {
-        return mapper.toList(usersRepository.findPage(filterDto, page, size), UserDto.class);
+    public List<Object> findAll(UserFilterDto filterDto, Integer page, Integer size) {
+        return mapper.toList(usersRepository.findPage(filterDto, page, size), Object.class);
     }
 
     @Override

@@ -9,7 +9,6 @@ import org.jboss.logging.Logger;
 import com.logicsoftware.clients.ViaCepClient;
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
 import com.logicsoftware.services.AddressService;
-import com.logicsoftware.utils.i18n.Messages;
 
 import io.quarkus.arc.Unremovable;
 import io.quarkus.arc.log.LoggerName;
@@ -18,11 +17,8 @@ import io.quarkus.arc.log.LoggerName;
 @ApplicationScoped
 public class AddressServiceV1 implements AddressService {
     
-    @LoggerName("address-service")
+    @LoggerName("address-service-v1")
     Logger logger;
-
-    @Inject
-    Messages message;
 
     @Inject
     @RestClient

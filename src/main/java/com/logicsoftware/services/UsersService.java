@@ -9,7 +9,7 @@ import com.logicsoftware.dtos.user.UserFilterDto;
 
 public interface UsersService {
 
-    List<UserDto> findAll(UserFilterDto filterDto, Integer page, Integer size);
+    List<Object> findAll(UserFilterDto filterDto, Integer page, Integer size);
 
     Long count(UserFilterDto filterDto);
 
