@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import com.logicsoftware.dtos.user.UserCreateDto;
-import com.logicsoftware.dtos.user.UserDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 
 public interface UsersService {
@@ -13,11 +12,11 @@ public interface UsersService {
 
     Long count(UserFilterDto filterDto);
 
-    UserDto find(Long id);
+    Object find(Long id);
 
-    UserDto create(UserCreateDto userDto);
+    Object create(UserCreateDto userDto);
 
-    UserDto update(UserCreateDto userDto, Long id) throws IllegalAccessException, InvocationTargetException;
+    Object update(UserCreateDto userDto, Long id) throws IllegalAccessException, InvocationTargetException;
 
     void delete(Long id);
 
