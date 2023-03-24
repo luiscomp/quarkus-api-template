@@ -1,8 +1,8 @@
-package com.logicsoftware.mocks;
+package com.logicsoftware.v1.mocks;
 
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
 
-public class AddressMocks {
+public class AddressResourceMocksV1 {
 
     public static ViaCepResponseDTO viaCepAddress() {
         return ViaCepResponseDTO.builder()

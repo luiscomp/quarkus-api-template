@@ -1,4 +1,4 @@
-package com.logicsoftware.v1.address;
+package com.logicsoftware.v1.services.address;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Test;
 
 import com.logicsoftware.database.DatabaseLifecycle;
 import com.logicsoftware.dtos.address.ViaCepResponseDTO;
-import com.logicsoftware.mocks.AddressMocks;
 import com.logicsoftware.services.v1.AddressServiceV1;
+import com.logicsoftware.v1.mocks.AddressResourceMocksV1;
 
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
-@QuarkusTestResource(DatabaseLifecycle.class)
-public class AddressUnitTest {
+@QuarkusTestResource(value = DatabaseLifecycle.class, parallel = true)
+public class AddressUnitTestV1 {
 
     @Inject
     AddressServiceV1 addressService;
@@ -24,6 +24,6 @@ public class AddressUnitTest {
     @Test
     public void getAddressByCep() {
         ViaCepResponseDTO response = addressService.getAddressByCep("64033660");
-        assertEquals(AddressMocks.viaCepAddress(), response);
+        assertEquals(AddressResourceMocksV1.viaCepAddress(), response);
     }
 }

@@ -6,7 +6,7 @@ import java.util.List;
 import com.logicsoftware.dtos.user.UserCreateDto;
 import com.logicsoftware.dtos.user.UserFilterDto;
 
-public interface UsersService {
+public interface UserService {
 
     List<Object> findAll(UserFilterDto filterDto, Integer page, Integer size);
 

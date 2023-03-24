@@ -52,7 +52,7 @@ public class AddressResource {
     public DataResponse<Object> getAddressByCep(@PathParam("cep") String cep, @PathParam("version") String version) {
         AddressService addressService = beanGenerator.getInstance(AddressService.class, version)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException(message.getMessage("app.resource.not.found", version)));
+                        () -> new ResourceNotFoundException(message.getMessage("api.resource.not.found", version)));
 
         DataResponse.DataResponseBuilder<Object> response = DataResponse.builder();
         response.data(addressService.getAddressByCep(cep));
